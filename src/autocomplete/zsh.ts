@@ -1,4 +1,5 @@
 import {Command, Config, Interfaces} from '@oclif/core'
+import {kebabCase} from 'case-anything'
 import * as ejs from 'ejs'
 import {format} from 'node:util'
 
@@ -146,10 +147,11 @@ _${this.config.bin}() {
       const chars = []
       if (f.char) chars.push(f.char)
       if (f.charAliases) chars.push(...f.charAliases)
-      const fullNames = [f.name, ...(f.aliases ?? [])]
+      const fullNames = [f.name, ...(f.aliases ?? [])].map((name) => kebabCase(name))
       const allNames = [...chars.map((char) => '-' + char), ...fullNames.map((name) => '--' + name)]
       const commaSeparated = allNames.join(',')
       const spaceSeparated = allNames.join(' ')
+      const kebabName = kebabCase(f.name)
 
       if (f.type === 'option') {
         if (allNames.length > 1) {
@@ -163,23 +165,23 @@ _${this.config.bin}() {
 
           flagSpec += `"[${flagSummary}]`
 
-          flagSpec += f.options ? `:${f.name} options:(${f.options?.join(' ')})"` : ':file:_files"'
+          flagSpec += f.options ? `:${kebabName} options:(${f.options?.join(' ')})"` : ':file:_files"'
         } else {
           if (f.multiple) {
             // this flag can be present multiple times on the line
             flagSpec += '"*"'
           }
 
-          flagSpec += `--${f.name}"[${flagSummary}]:`
+          flagSpec += `--${kebabName}"[${flagSummary}]:`
 
-          flagSpec += f.options ? `${f.name} options:(${f.options.join(' ')})"` : 'file:_files"'
+          flagSpec += f.options ? `${kebabName} options:(${f.options.join(' ')})"` : 'file:_files"'
         }
       } else if (allNames.length > 1) {
         // Flag.Boolean
         flagSpec += `"(${spaceSeparated})"{${commaSeparated}}"[${flagSummary}]"`
       } else {
         // Flag.Boolean
-        flagSpec += `--${f.name}"[${flagSummary}]"`
+        flagSpec += `--${kebabName}"[${flagSummary}]"`
       }
 
       flagSpec += ' \\\n'
