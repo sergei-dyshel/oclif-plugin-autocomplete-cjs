@@ -143,14 +143,22 @@ _${this.config.bin}() {
 
       let flagSpec = ''
 
+      const chars = []
+      if (f.char) chars.push(f.char)
+      if (f.charAliases) chars.push(...f.charAliases)
+      const fullNames = [f.name, ...(f.aliases ?? [])]
+      const allNames = [...chars.map((char) => '-' + char), ...fullNames.map((name) => '--' + name)]
+      const commaSeparated = allNames.join(',')
+      const spaceSeparated = allNames.join(' ')
+
       if (f.type === 'option') {
-        if (f.char) {
+        if (allNames.length > 1) {
           // eslint-disable-next-line unicorn/prefer-ternary
           if (f.multiple) {
             // this flag can be present multiple times on the line
-            flagSpec += `"*"{-${f.char},--${f.name}}`
+            flagSpec += `"*"{${commaSeparated}}`
           } else {
-            flagSpec += `"(-${f.char} --${f.name})"{-${f.char},--${f.name}}`
+            flagSpec += `"(${spaceSeparated})"{${commaSeparated}}`
           }
 
           flagSpec += `"[${flagSummary}]`
@@ -166,9 +174,9 @@ _${this.config.bin}() {
 
           flagSpec += f.options ? `${f.name} options:(${f.options.join(' ')})"` : 'file:_files"'
         }
-      } else if (f.char) {
+      } else if (allNames.length > 1) {
         // Flag.Boolean
-        flagSpec += `"(-${f.char} --${f.name})"{-${f.char},--${f.name}}"[${flagSummary}]"`
+        flagSpec += `"(${spaceSeparated})"{${commaSeparated}}"[${flagSummary}]"`
       } else {
         // Flag.Boolean
         flagSpec += `--${f.name}"[${flagSummary}]"`
