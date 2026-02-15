@@ -117,7 +117,6 @@ _${this.config.bin}() {
   esac
 }
 
-_${this.config.bin}
 `
   }
 
